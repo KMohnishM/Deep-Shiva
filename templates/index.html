@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Shiva - Your AI Travel Companion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #4facfe;
+            --success-color: #43e97b;
+            --warning-color: #fa709a;
+            
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --bg-card: #1e1e3f;
+            --bg-input: #2a2a4a;
+            
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8d4;
+            --text-muted: #8b8ba7;
+            
+            --border-color: #2a2a4a;
+            --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.3);
+            
+            --border-radius: 16px;
+            --border-radius-sm: 8px;
+            --border-radius-lg: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(1deg); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Main Chat Container */
+        .chat-container {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(20px);
+            position: relative;
+        }
+
+        /* Persona Selector */
+        .persona-section {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .persona-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .persona-card {
+            background: var(--bg-card);
+            border: 2px solid transparent;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .persona-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .persona-card:hover::before {
+            left: 100%;
+        }
+
+        .persona-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--accent-color);
+        }
+
+        .persona-card.active {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(67, 233, 123, 0.1) 100%);
+        }
+
+        .persona-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .persona-card[data-persona="travel"] .persona-icon { color: #4facfe; }
+        .persona-card[data-persona="yoga"] .persona-icon { color: #43e97b; }
+        .persona-card[data-persona="wellness"] .persona-icon { color: #fa709a; }
+        .persona-card[data-persona="mental"] .persona-icon { color: #fee140; }
+
+        .persona-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .persona-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Persona Questions Panel */
+        .questions-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin: 20px 24px 0 24px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: none;
+            position: relative;
+            z-index: 10;
+        }
+
+        .questions-panel.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        .questions-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .questions-icon {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .questions-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .questions-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .question-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInQuestion 0.5s ease forwards;
+        }
+
+        @keyframes slideInQuestion {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-gradient);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .question-card:hover {
+            transform: translateX(8px);
+            border-color: var(--accent-color);
+            box-shadow: var(--shadow-light);
+        }
+
+        .question-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .question-text {
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            margin-left: 12px;
+        }
+
+        .question-number {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--accent-gradient);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Yoga Pose Correction iframe */
+        .yoga-iframe-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 20px 24px 0 24px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: none;
+            position: relative;
+            z-index: 10;
+        }
+
+        .yoga-iframe-container.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        .yoga-iframe-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .yoga-iframe-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .yoga-iframe-title i {
+            color: var(--success-color);
+        }
+
+        .close-yoga-iframe {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-yoga-iframe:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .yoga-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            background: white;
+        }
+
+        /* Messages Area */
+        .messages-container {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+            margin-top: 0;
+            transition: margin-top 0.5s ease;
+        }
+
+        .messages-container.with-questions {
+            margin-top: 20px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 16px 20px;
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            animation: messageSlideIn 0.4s ease-out;
+            word-wrap: break-word;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            background: var(--primary-gradient);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-light);
+        }
+
+        .bot-message {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            margin-right: auto;
+            border-bottom-left-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-light);
+        }
+
+        .bot-message pre {
+            background: var(--bg-input);
+            padding: 12px;
+            border-radius: var(--border-radius-sm);
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .bot-message code {
+            background: var(--bg-input);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        /* Input Area */
+        .input-section {
+            background: var(--bg-tertiary);
+            padding: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: var(--bg-input);
+            border-radius: var(--border-radius);
+            padding: 4px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .input-container:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .message-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            padding: 16px 20px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .message-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            padding: 16px 24px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+
+        .send-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-heavy);
+            background: var(--secondary-gradient);
+        }
+
+        .send-button:hover::before {
+            left: 100%;
+        }
+
+        .send-button:active {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            background: var(--bg-input);
+            color: var(--text-muted);
+        }
+
+        .send-button:disabled:hover {
+            transform: none;
+            box-shadow: var(--shadow-light);
+        }
+
+        .send-button i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .send-button:hover i {
+            transform: translateX(2px);
+        }
+
+        /* Loading Animation */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            margin-right: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Clear Button */
+        .clear-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .clear-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-text {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .welcome-subtext {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .persona-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+            
+            .input-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .send-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Scrollbar Styling */
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        /* Audio Indicator */
+        .audio-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--success-gradient);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-om"></i> Deep Shiva</h1>
+            <p>Your AI Travel Companion for Indian Tourism & Wellness</p>
+        </div>
+
+        <!-- Main Chat Container -->
+        <div class="chat-container">
+            <!-- Clear Button -->
+            <button class="clear-button" onclick="clearChat()">
+                <i class="fas fa-trash"></i> Clear Chat
+            </button>
+
+            <!-- Persona Selector -->
+            <div class="persona-section">
+                <h3 style="margin-bottom: 16px; color: var(--text-primary);">
+                    <i class="fas fa-magic"></i> Choose Your Experience
+                </h3>
+                <div class="persona-grid">
+                    <div class="persona-card" data-persona="travel" onclick="selectPersona('travel')">
+                        <i class="fas fa-plane persona-icon"></i>
+                        <div class="persona-title">Travel Guide</div>
+                        <div class="persona-desc">Plan your perfect Indian journey with detailed itineraries and cultural insights</div>
+                    </div>
+                    <div class="persona-card" data-persona="yoga" onclick="selectPersona('yoga')">
+                        <i class="fas fa-pray persona-icon"></i>
+                        <div class="persona-title">Yoga Assistant</div>
+                        <div class="persona-desc">Discover traditional yoga practices and spiritual guidance</div>
+                    </div>
+                    <div class="persona-card" data-persona="wellness" onclick="selectPersona('wellness')">
+                        <i class="fas fa-leaf persona-icon"></i>
+                        <div class="persona-title">Wellness Guide</div>
+                        <div class="persona-desc">Explore Ayurvedic practices and holistic wellness approaches</div>
+                    </div>
+                    <div class="persona-card" data-persona="mental" onclick="selectPersona('mental')">
+                        <i class="fas fa-brain persona-icon"></i>
+                        <div class="persona-title">Mental Wellness</div>
+                        <div class="persona-desc">Find mindfulness techniques and emotional balance practices</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Panel -->
+            <div class="questions-panel" id="questionsPanel">
+                <div class="questions-header">
+                    <i class="fas fa-question-circle questions-icon"></i>
+                    <div class="questions-title">Suggested Questions</div>
+                </div>
+                <div class="questions-grid" id="questionsGrid">
+                    <!-- Questions will be dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Yoga Pose Correction iframe -->
+            <div class="yoga-iframe-container" id="yogaIframeContainer">
+                <div class="yoga-iframe-header">
+                    <div class="yoga-iframe-title">
+                        <i class="fas fa-yoga"></i>
+                        Yoga Pose Correction System
+                    </div>
+                    <button class="close-yoga-iframe" onclick="closeYogaIframe()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+                <iframe 
+                    src="https://sarvyi.github.io/Yoga-Pose-Correction/correct.html" 
+                    class="yoga-iframe"
+                    title="Yoga Pose Correction System"
+                    allow="camera; microphone"
+                ></iframe>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-container" id="messagesContainer">
+                <!-- Welcome Message -->
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <i class="fas fa-om"></i>
+                    </div>
+                    <div class="welcome-text">Namaste! 🙏</div>
+                    <div class="welcome-subtext">
+                        I'm Deep Shiva, your AI companion for exploring the rich culture, spirituality, and beauty of India. 
+                        Choose your experience above and let's begin your journey together.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span>Deep Shiva is thinking...</span>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="input-container">
+                    <input type="text" id="messageInput" class="message-input" 
+                           placeholder="Ask me about Indian tourism, yoga, wellness, or anything else..." 
+                           onkeypress="handleKeyPress(event)">
+                    <button class="send-button" onclick="sendMessage()" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPersona = null;
+        let isTyping = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus on input
+            document.getElementById('messageInput').focus();
+            
+            // Add smooth scrolling to messages
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+
+        // Persona-specific questions
+        const personaQuestions = {
+            'travel': [
+                "When are you planning to visit and for how long?",
+                "What interests you most: temples, meditation, or local culture?",
+                "Do you have any specific destinations in mind?"
+            ],
+            'yoga': [
+                "Have you practiced yoga before, and do you have any health concerns?",
+                "What's your goal: flexibility, stress relief, or spiritual growth?",
+                "How much time can you dedicate to practice daily?",
+                "Try Yoga Pose Correction System"
+            ],
+            'wellness': [
+                "What specific aspect of wellness interests you: sleep, energy, or balance?",
+                "Do you follow any particular dietary preferences?",
+                "Are you looking for quick tips or long-term lifestyle changes?"
+            ],
+            'mental': [
+                "What brings you here today: stress, focus, or emotional balance?",
+                "Would you prefer quick exercises or guided meditation?",
+                "How much time can you spend on mindfulness practices?"
+            ]
+        };
+
+        // Persona Selection
+        function selectPersona(persona) {
+            currentPersona = persona;
+            
+            // Update active state
+            document.querySelectorAll('.persona-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`[data-persona="${persona}"]`).classList.add('active');
+            
+            // Show questions panel with animation
+            showQuestionsPanel(persona);
+            
+            // Add persona selection message
+            const personaNames = {
+                'travel': 'Travel Guide',
+                'yoga': 'Yoga Assistant', 
+                'wellness': 'Wellness Guide',
+                'mental': 'Mental Wellness'
+            };
+            
+            addMessage(`I'm now in ${personaNames[persona]} mode. How can I assist you today?`, 'bot');
+        }
+
+        // Show Questions Panel
+        function showQuestionsPanel(persona) {
+            const questionsPanel = document.getElementById('questionsPanel');
+            const questionsGrid = document.getElementById('questionsGrid');
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            // Clear previous questions
+            questionsGrid.innerHTML = '';
+            
+            // Add questions for selected persona
+            const questions = personaQuestions[persona];
+            questions.forEach((question, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.style.animationDelay = `${index * 0.1}s`;
+                questionCard.onclick = () => askQuestion(question);
+                
+                questionCard.innerHTML = `
+                    <div class="question-number">${index + 1}</div>
+                    <div class="question-text">${question}</div>
+                `;
+                
+                questionsGrid.appendChild(questionCard);
+            });
+            
+            // Show panel with animation
+            questionsPanel.classList.add('show');
+            messagesContainer.classList.add('with-questions');
+        }
+
+        // Ask Question
+        function askQuestion(question) {
+            // Check if it's the yoga pose correction option
+            if (question === "Try Yoga Pose Correction System") {
+                showYogaIframe();
+                addMessage("Opening Yoga Pose Correction System for you! 🧘‍♀️", 'bot');
+                return;
+            }
+            
+            // Hide questions panel first
+            document.getElementById('questionsPanel').classList.remove('show');
+            document.getElementById('messagesContainer').classList.remove('with-questions');
+            
+            // Add question to chat
+            addMessage(question, 'user');
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Send to backend directly without setting input value
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: question,
+                    persona: currentPersona
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideTypingIndicator();
+                
+                if (data.error) {
+                    addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                } else {
+                    let responseText = data.response;
+                    
+                    // Add audio indicator if response contains audio
+                    if (data.has_audio) {
+                        responseText += ' <span class="audio-indicator"><i class="fas fa-volume-up"></i> Audio Available</span>';
+                    }
+                    
+                    addMessage(responseText, 'bot');
+                }
+            })
+            .catch(error => {
+                hideTypingIndicator();
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                console.error('Error:', error);
+            });
+        }
+
+        // Show Yoga iframe
+        function showYogaIframe() {
+            const yogaContainer = document.getElementById('yogaIframeContainer');
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            // Hide questions panel if open
+            document.getElementById('questionsPanel').classList.remove('show');
+            document.getElementById('messagesContainer').classList.remove('with-questions');
+            
+            // Show yoga iframe
+            yogaContainer.classList.add('show');
+            messagesContainer.classList.add('with-questions');
+        }
+
+        // Close Yoga iframe
+        function closeYogaIframe() {
+            const yogaContainer = document.getElementById('yogaIframeContainer');
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            yogaContainer.classList.remove('show');
+            messagesContainer.classList.remove('with-questions');
+        }
+
+        // Send Message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message && !isTyping) {
+                addMessage(message, 'user');
+                input.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Send to backend
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        persona: currentPersona
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideTypingIndicator();
+                    
+                    if (data.error) {
+                        addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                    } else {
+                        let responseText = data.response;
+                        
+                        // Add audio indicator if response contains audio
+                        if (data.has_audio) {
+                            responseText += ' <span class="audio-indicator"><i class="fas fa-volume-up"></i> Audio Available</span>';
+                        }
+                        
+                        addMessage(responseText, 'bot');
+                    }
+                })
+                .catch(error => {
+                    hideTypingIndicator();
+                    addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        // Handle Enter Key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Add Message to Chat
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            // Remove welcome message if it exists
+            const welcomeMessage = messagesContainer.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.innerHTML = text;
+            
+            messagesContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Show/Hide Typing Indicator
+        function showTypingIndicator() {
+            isTyping = true;
+            document.getElementById('typingIndicator').style.display = 'flex';
+            document.getElementById('sendButton').disabled = true;
+            
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            isTyping = false;
+            document.getElementById('typingIndicator').style.display = 'none';
+            document.getElementById('sendButton').disabled = false;
+        }
+
+        // Clear Chat
+        function clearChat() {
+            if (confirm('Are you sure you want to clear the chat?')) {
+                fetch('/clear', {
+                    method: 'POST'
+                })
+                .then(() => {
+                    const messagesContainer = document.getElementById('messagesContainer');
+                    messagesContainer.innerHTML = `
+                        <div class="welcome-message">
+                            <div class="welcome-icon">
+                                <i class="fas fa-om"></i>
+                            </div>
+                            <div class="welcome-text">Namaste! 🙏</div>
+                            <div class="welcome-subtext">
+                                I'm Deep Shiva, your AI companion for exploring the rich culture, spirituality, and beauty of India. 
+                                Choose your experience above and let's begin your journey together.
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Reset persona selection
+                    currentPersona = null;
+                    document.querySelectorAll('.persona-card').forEach(card => {
+                        card.classList.remove('active');
+                    });
+                    
+                    // Hide questions panel and yoga iframe
+                    document.getElementById('questionsPanel').classList.remove('show');
+                    document.getElementById('yogaIframeContainer').classList.remove('show');
+                    document.getElementById('messagesContainer').classList.remove('with-questions');
+                });
+            }
+        }
+
+        // Auto-resize input on focus
+        document.getElementById('messageInput').addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+
+        document.getElementById('messageInput').addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+
+        // Hide questions panel when user starts typing
+        document.getElementById('messageInput').addEventListener('input', function() {
+            const questionsPanel = document.getElementById('questionsPanel');
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            if (questionsPanel.classList.contains('show')) {
+                questionsPanel.classList.remove('show');
+                messagesContainer.classList.remove('with-questions');
+            }
+        });
+    </script>
+</body>
+</html>
