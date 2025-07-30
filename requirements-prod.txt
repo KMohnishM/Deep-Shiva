@@ -1,0 +1,19 @@
+# Core Flask dependencies
+flask>=3.0.0,<4.0.0
+flask-session>=0.5.0,<1.0.0
+python-dotenv>=1.0.0,<2.0.0
+
+# HTTP and networking
+requests>=2.31.0,<3.0.0
+
+# Azure dependencies
+azure-identity>=1.15.0,<2.0.0
+
+# OpenAI and LangChain (latest stable versions)
+openai>=1.12.0
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-core>=0.1.22
+
+# Tokenization
+tiktoken>=0.5.2,<1.0.0 

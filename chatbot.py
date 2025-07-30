@@ -12,13 +12,22 @@ load_dotenv()
 
 class TourismChatbot:
     def __init__(self):
-        self.llm = AzureChatOpenAI(
-            openai_api_version=os.getenv("OPENAI_API_VERSION"),
-            azure_deployment=os.getenv("AZURE_GPT_DEPLOYMENT"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            temperature=0.7
-        )
+        try:
+            self.llm = AzureChatOpenAI(
+                openai_api_version=os.getenv("OPENAI_API_VERSION"),
+                azure_deployment=os.getenv("AZURE_GPT_DEPLOYMENT"),
+                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+                temperature=0.7
+            )
+        except Exception as e:
+            # Fallback configuration without problematic parameters
+            self.llm = AzureChatOpenAI(
+                openai_api_version=os.getenv("OPENAI_API_VERSION"),
+                azure_deployment=os.getenv("AZURE_GPT_DEPLOYMENT"),
+                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+                api_key=os.getenv("AZURE_OPENAI_API_KEY")
+            )
         
         self.memory = ConversationBufferMemory(
             memory_key="chat_history",
