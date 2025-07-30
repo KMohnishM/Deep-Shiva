@@ -2,24 +2,24 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.py",
+      "src": "app-minimal.py",
       "use": "@vercel/python",
       "config": {
-        "pip": "requirements-prod.txt"
+        "pip": "requirements-minimal.txt"
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/app.py"
+      "dest": "/app-minimal.py"
     }
   ],
   "env": {
     "PYTHONPATH": "."
   },
   "functions": {
-    "app.py": {
+    "app-minimal.py": {
       "maxDuration": 30
     }
   }
