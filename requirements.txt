@@ -6,4 +6,6 @@ azure-identity
 tiktoken
 langchain
 langchain-openai
-openai 
+openai
+gunicorn
+gevent 
