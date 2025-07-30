@@ -15,6 +15,16 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY') or os.urandom(24)
 
 chatbots = {} # Store the chatbot session instances
 
+# Import chatbot with error handling
+try:
+    from chatbot import TourismChatbot
+    CHATBOT_AVAILABLE = True
+    logger.info("Chatbot module imported successfully")
+except Exception as e:
+    CHATBOT_AVAILABLE = False
+    logger.error(f"Failed to import chatbot: {e}")
+    logger.error(traceback.format_exc())
+
 @app.route('/')
 def home():
     try:
@@ -23,7 +33,18 @@ def home():
     except Exception as e:
         logger.error(f"Error in home route: {e}")
         logger.error(traceback.format_exc())
-        return f"Server is running but encountered an error: {str(e)}", 500
+        # Return a simple HTML response if template fails
+        return f'''
+        <!DOCTYPE html>
+        <html>
+        <head><title>Deep Shiva - Error</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>🧘‍♀️ Deep Shiva</h1>
+            <p>Server is running but encountered an error: {str(e)}</p>
+            <p>Please check the logs for more details.</p>
+        </body>
+        </html>
+        ''', 500
 
 @app.route('/health')
 def health():
@@ -36,6 +57,7 @@ def test():
         return jsonify({
             'status': 'success',
             'message': 'Flask app is working!',
+            'chatbot_available': CHATBOT_AVAILABLE,
             'environment': {
                 'OPENAI_API_VERSION': bool(os.getenv('OPENAI_API_VERSION')),
                 'AZURE_GPT_DEPLOYMENT': bool(os.getenv('AZURE_GPT_DEPLOYMENT')),
@@ -59,12 +81,44 @@ def chat():
         if not user_message:
             return jsonify({'error': 'No message provided'}), 400
 
-        # For now, return a simple response without chatbot
-        response = f"Hello! I received your message: '{user_message}'. The chatbot is currently being initialized."
+        if not CHATBOT_AVAILABLE:
+            return jsonify({
+                'response': "I'm sorry, the AI chatbot is currently unavailable. Please try again later.",
+                'has_audio': False
+            })
+
+        session_id = session.get('session_id')
+        if not session_id or session_id not in chatbots:
+            session['session_id'] = str(uuid.uuid4())
+            try:
+                chatbots[session['session_id']] = TourismChatbot()
+                logger.info("Chatbot created successfully")
+            except Exception as e:
+                logger.error(f"Error creating chatbot: {e}")
+                logger.error(traceback.format_exc())
+                return jsonify({'error': 'Failed to initialize chatbot. Please check your Azure OpenAI configuration.'}), 500
+            session_id = session['session_id']
+        
+        chatbot = chatbots[session_id]
+        
+        # Update persona if changed
+        chatbot.set_persona(persona)
+        
+        # Get response
+        try:
+            response = chatbot.get_response(user_message)
+            logger.info("Response generated successfully")
+        except Exception as e:
+            logger.error(f"Error getting response: {e}")
+            logger.error(traceback.format_exc())
+            return jsonify({'error': 'Failed to get response from AI. Please try again.'}), 500
+        
+        # Check if response contains audio markers
+        has_audio = '[AUDIO]' in response
         
         return jsonify({
             'response': response,
-            'has_audio': False
+            'has_audio': has_audio
         })
     except Exception as e:
         logger.error(f"Unexpected error in chat: {e}")
