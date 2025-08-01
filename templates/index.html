@@ -51,9 +51,11 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
             position: relative;
+            overflow-y: auto;
         }
 
         /* Animated Background */
@@ -80,7 +82,7 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             padding: 20px;
@@ -117,11 +119,13 @@
             box-shadow: var(--shadow-heavy);
             border: 1px solid var(--border-color);
             overflow: hidden;
-            flex-grow: 1;
+            flex: 1;
             display: flex;
             flex-direction: column;
             backdrop-filter: blur(20px);
             position: relative;
+            height: calc(100vh - 180px);
+            min-height: 500px;
         }
 
         /* Persona Selector */
@@ -382,7 +386,7 @@
 
         /* Messages Area */
         .messages-container {
-            flex-grow: 1;
+            flex: 1;
             padding: 24px;
             overflow-y: auto;
             display: flex;
@@ -391,6 +395,7 @@
             scroll-behavior: smooth;
             margin-top: 0;
             transition: margin-top 0.5s ease;
+            max-height: calc(100% - 120px);
         }
 
         .messages-container.with-questions {
@@ -434,6 +439,87 @@
             border-bottom-left-radius: var(--border-radius-sm);
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-light);
+            max-width: 90%;
+            padding: 16px 20px;
+            line-height: 1.6;
+        }
+        
+        .message-content {
+            word-wrap: break-word;
+        }
+        
+        .message-content p {
+            margin: 0.5em 0;
+            line-height: 1.6;
+        }
+        
+        .message-content p:first-child {
+            margin-top: 0;
+        }
+        
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .message-header {
+            margin: 1em 0 0.5em 0;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .message-header:first-child {
+            margin-top: 0;
+        }
+        
+        .message-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            border-bottom: 1px solid var(--accent-color);
+            transition: all 0.2s ease;
+        }
+        
+        .message-link:hover {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        .message-list {
+            margin: 0.8em 0;
+            padding-left: 1.5em;
+        }
+        
+        .message-list-item {
+            margin: 0.3em 0;
+            position: relative;
+        }
+        
+        .message-code-block {
+            background: var(--bg-input);
+            border-radius: var(--border-radius-sm);
+            padding: 1em;
+            margin: 0.8em 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            border-left: 3px solid var(--accent-color);
+        }
+        
+        .message-inline-code {
+            background: var(--bg-input);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: var(--accent-color);
+        }
+        
+        .message-time {
+            font-size: 0.7em;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 4px;
+            opacity: 0.8;
         }
 
         .bot-message pre {
@@ -1073,6 +1159,54 @@
             }
         }
 
+        // Format message content with proper HTML and styling
+        function formatMessageContent(text) {
+            if (!text) return '';
+            
+            // Convert markdown-style links to HTML
+            let formattedText = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
+                '<a href="$2" target="_blank" class="message-link">$1</a>');
+                
+            // Format lists (both ordered and unordered)
+            formattedText = formattedText.replace(/^(\d+\.\s+.*(?:\n|$))+/gm, 
+                (match) => `<div class="message-list">${match.replace(/^(\d+\.\s+.*(?:\n|$))/gm, 
+                    (m) => `<div class="message-list-item">${m}</div>`)}</div>`);
+                    
+            formattedText = formattedText.replace(/^[-*]\s+.*(?:\n|$)/gm, 
+                (match) => `<div class="message-list">${match.replace(/^[-*]\s+(.*(?:\n|$))/gm, 
+                    (m, p1) => `<div class="message-list-item">• ${p1}</div>`)}</div>`);
+            
+            // Format code blocks
+            formattedText = formattedText.replace(/```([\s\S]*?)```/g, 
+                '<pre class="message-code-block"><code>$1</code></pre>');
+                
+            // Format inline code
+            formattedText = formattedText.replace(/`([^`]+)`/g, 
+                '<code class="message-inline-code">$1</code>');
+                
+            // Format bold and italic
+            formattedText = formattedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            formattedText = formattedText.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            
+            // Format headers (## Header)
+            formattedText = formattedText.replace(/^###\s+(.+)$/gm, '<h3 class="message-header">$1</h3>');
+            formattedText = formattedText.replace(/^##\s+(.+)$/gm, '<h2 class="message-header">$1</h2>');
+            formattedText = formattedText.replace(/^#\s+(.+)$/gm, '<h1 class="message-header">$1</h1>');
+            
+            // Format paragraphs (double newline)
+            formattedText = formattedText.replace(/([^\n])\n\n([^\n])/g, '$1</p><p>$2');
+            
+            // Replace single newlines with <br> for line breaks
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            
+            // Wrap in paragraph if no other block elements
+            if (!formattedText.match(/^<(div|h[1-6]|pre|ul|ol|blockquote)/)) {
+                formattedText = `<p>${formattedText}</p>`;
+            }
+            
+            return formattedText;
+        }
+
         // Add Message to Chat
         function addMessage(text, sender) {
             const messagesContainer = document.getElementById('messagesContainer');
@@ -1085,7 +1219,20 @@
             
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
-            messageDiv.innerHTML = text;
+            
+            // Add timestamp
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Format the message content
+            const formattedContent = formatMessageContent(text);
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${formattedContent}
+                </div>
+                <div class="message-time">${timeString}</div>
+            `;
             
             messagesContainer.appendChild(messageDiv);
             
